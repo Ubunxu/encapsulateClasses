@@ -1,0 +1,9 @@
+说明：
+1. 这些类是网络编程中配合发送协议以及接受协议的类。
+其中：
+U3DSocket是用来开启TCP连接的。
+EventDispatch是用来注册协议的。
+MessageQueue是用来将读取的协议存进队列中，然后逐个执行。
+ByteBuffer是用来将信息转换为字节信息的。
+MessageNode是待扩展的一个节点类。
+EncryptDecrypt是加密方法
