@@ -1,0 +1,73 @@
+--此类相当于枪（挂在摄像机的luaRunner上）
+--之所以可以这样，主要是因为List和此lua文件都是放在Resources中
+require("xlua/List")
+
+local GameObject = CS.UnityEngine.GameObject
+local Vector3 = CS.UnityEngine.Vector3
+local Input = CS.UnityEngine.Input
+
+
+--文件名和表名一样这样方便LUNRunner中的虚拟机加载
+TestBullet = {} 
+
+local this = TestBullet
+--保存子弹
+local arr = nil
+
+this.Awake = function ( ... )
+	-- body
+
+end
+
+this.Start = function ( ... )
+	-- body		
+	arr = List:New()
+	this.CreateBullet(10)
+
+end
+
+this.Update = function ( ... )
+	-- body
+	if(Input.GetMouseButtonDown(0)) then
+		this.Send()
+	end				
+
+end
+
+--发射子弹
+this.Send = function ( ... )
+	-- body
+	if(#arr>0) then
+		local b = arr[1]
+		arr:RemoveAt(1)
+		b:CallLuaFunction('Send',this.self)--调用另外一个lua文件中的send方法
+		b:TestRay()
+	else
+		print('没有子弹了')
+	end
+end
+
+
+--创建子弹
+this.CreateBullet = function ( count )
+	-- body
+	for i=1,count,1 do
+		--创建对象
+		local bullet = GameObject.CreatePrimitive(CS.UnityEngine.PrimitiveType.Sphere)--枚举也要导入
+		bullet.transform.localScale = Vector3.one		
+
+		--设置类组件（在子弹对象上添加LuaRunner类）
+		local  luarun = bullet:AddComponent(typeof(CS.LuaRunner))
+		luarun.luaFileName = 'Bullet.lua'   --设置子弹的lua文件名
+
+		arr:addValue(luarun)
+	end
+end
+			
+--回收子弹（回收的子弹的luarunner类组件）（其实这里就是做了一个子弹的luarunner对象放回了list中，真实的操作是在子弹lua文件里面）
+this.ReBackAdd = function ( bulletLuaRun )
+	-- body
+	arr:addValue(bulletLuaRun)
+end
+
+

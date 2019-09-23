@@ -1,0 +1,96 @@
+--此类相当于子弹
+
+local GameObject = CS.UnityEngine.GameObject
+local Vector3 = CS.UnityEngine.Vector3
+
+Bullet = {}
+local this = Bullet
+local r  --刚体对象
+local timer = 0  --子弹发射计时器 
+local isSend = false  --判断子弹是否发射
+local parent = nil  --相当于摄像机或者是枪
+
+local oldPos
+
+this.Start = function ( ... )
+	-- body
+	this.initBullet()
+	-- oldPos = this.transform.position
+end
+
+--初始化子弹
+this.initBullet = function ( ... )
+	-- body
+	r = this.self.gameObject:AddComponent(typeof(CS.UnityEngine.Rigidbody))
+	r.isKinematic = true--失去物理运动效果
+	r.gameObject:SetActive(false)--先隐藏起来
+end
+
+--发送子弹
+this.Send = function ( _parent )
+	-- body
+	parent = _parent
+	r.gameObject:SetActive(true)
+	this.transform.position = parent.transform.position
+	this.transform.rotation = parent.transform.rotation
+	r.isKinematic = false
+	r:AddForce(Vector3.forward*20000)
+	isSend= true
+end
+
+--碰撞方法
+this.OnCollisionEnter = function ( collision )
+	-- body
+	local objName = collision.gameObject.name	
+	if(objName=='qiang') then
+		local objQiang = GameObject.Find('qiang').gameObject
+		objQiang:SetActive(false)
+	end
+end
+
+--触发方法
+this.OnTriggerEnter = function ( other )
+	-- body
+end
+
+
+
+this.Update = function ( ... )
+	-- body
+	--计时销毁子弹
+	timer = timer+CS.UnityEngine.Time.deltaTime
+	if(timer>=3) then
+		this.Reback()
+			
+	end
+	-- this.TestRay()
+	-- this.self:TestRay()
+end
+
+-- 回收子弹的一些操作
+this.Reback = function ( ... )
+	-- body
+	isSend = false
+	timer = 0
+	r.isKinematic = true
+	r.gameObject:SetActive(false)
+	parent:CallLuaFunction("ReBackAdd",this.self)
+end
+
+this.TestRay = function ( ... )
+	-- body	
+	local newPos = this.transform.position	
+	CS.UnityEngine.Debug.DrawRay(newPos,this.transform.forward*2,CS.UnityEngine.Color.red)
+	-- isHit,hit = CS.UnityEngine.Physics.Raycast(oldPos,(oldPos-newPos).normalized,Vector3.Distance(oldPos,newPos))
+	isHit,hit = CS.UnityEngine.Physics.Raycast(oldPos,newPos)
+	print(isHit,hit)
+	if(isHit) then
+		local obj =  hit.collider.gameObject;
+		if(obj.name == 'qiang') then
+			CS.UnityEngine.Object.DestroyObject(obj)
+		end    
+	end
+
+end
+
+---@type
