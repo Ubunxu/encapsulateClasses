@@ -1,0 +1,3 @@
+1. 这是将资源打成ab包的一个类，打包的核心代码就是  
+BuildPipeline.BuildAssetBundles("Assets/StreamingAssets", assetBundle, BuildAssetBundleOptions.None,_target);
+
